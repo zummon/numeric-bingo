@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Numeric Bingo</title>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<script src="https://cdn.tailwindcss.com/3.4.4"></script>
+		<script
+			defer
+			src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.0/dist/cdn.min.js"
+		></script>
+	</head>
+	<body class="bg-cyan-950 text-white">
+		<div x-data="{
+      colorPalette: ['bg-red-500','bg-green-500','bg-blue-500','bg-pink-500','bg-orange-500','bg-emerald-500','bg-indigo-500','bg-rose-500'],
+      players: [{
+        board: Array.from({ length:5 }).map(() => Array.from({ length:5 })),
+      }], 
+      panelRange: [
+        Array.from({ length:15 }, (_, i) => i + 1),
+        Array.from({ length:15 }, (_, i) => i + 16),
+        Array.from({ length:15 }, (_, i) => i + 31),
+        Array.from({ length:15 }, (_, i) => i + 46),
+        Array.from({ length:15 }, (_, i) => i + 61),
+      ], 
+      host: [],
+      cycle: 0,
+      shuffle (array) {
+        // gemini google - js sort random
+        return array.sort(() => Math.random() - 0.5)
+      }, 
+      restart () {
+        this.players.forEach((player,i) => {
+          player.board.forEach((boxes,index) => {
+            this.players[i].board[index] = this.shuffle(this.panelRange[index]).slice(0,5)
+          })
+        })
+        this.host = this.shuffle(
+          Array.from({ length:75 }, (_, i) => i + 1)
+        )
+      }, 
+    }" x-init="() => {
+      const object = JSON.stringify(players[0])
+      Array.from({ length:5 }).forEach(() => {
+        players.push(JSON.parse(object))
+      })
+      restart()
+    }">
+      <div class="flex justify-center flex-wrap gap-4 p-4">
+        <button class="text-2xl font-bold bg-white text-cyan-900 py-1 px-2 rounded-full" @click="() => {
+          if (players.length > 1) {
+            players.pop()
+          }
+        }">
+          -
+        </button>
+        <button class="text-2xl font-bold bg-white text-cyan-900 py-1 px-2 rounded-full" @click="() => {
+          let object = JSON.stringify(players[0])
+          object = JSON.parse(object)
+          object.board.forEach((boxes,index) => {
+            object.board[index] = shuffle(panelRange[index]).slice(0,5)
+          })
+          players.push(object)
+        }">
+          +
+        </button>
+        <button class="text-lg font-semibold bg-white text-cyan-900 py-1 px-2 rounded-full" @click="() => {
+          cycle += 1
+        }">
+          Play
+        </button>
+        <button class="text-lg font-semibold bg-white text-cyan-900 py-1 px-2 rounded-full" @click="() => {
+          restart() 
+          cycle = 0
+        }">
+          Restart
+        </button>
+      </div>
+      <div class="text-center">
+        <details>
+          <summary class="text-lg font-semibold text-yellow-400 border-2 rounded-full w-fit mx-auto list-inside px-2" x-text="host[cycle]"></summary>
+          <div class="pt-2" >
+            <ol class="list-decimal list-inside columns-5">
+              <template x-for="number in host">
+                <li :class="number == host[cycle] ? 'font-semibold text-yellow-400' : ''" x-text="number"></li>
+              </template>
+            </ol>
+          </div>
+        </details>
+      </div>
+      <div class="flex flex-wrap justify-center gap-4 p-4">
+        <template x-for="(player,index) in players">
+          <table class="text-center">
+            <thead>
+              <tr :class="colorPalette[index]">
+                <td class="font-semibold" :colspan="player.board.length" x-text="'Player ' + (index + 1)"></td>
+              </tr>
+            </thead>
+            <tbody class="bg-white text-black">
+              <template x-for="boxes in player.board">
+                <tr class="">
+                  <template x-for="box in boxes">
+                    <td class="px-2 py-1 border font-semibold" :class="host.slice(0,cycle + 1).includes(box) ? 'bg-yellow-400' : ''" x-text="box">
+                    </td>
+                  </template>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </template>
+      </div>
+		</div>
+    <div class="text-center">
+      Made by zummon (Teerapat Anantarattanachai)<br>
+      Something breaks, needs upgrade. Let me know
+    </div>
+	</body>
+</html>
